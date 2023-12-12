@@ -1,9 +1,10 @@
 #include <wchar.h>
 #include <wctype.h>
 #include <stdlib.h>
-#include "io_functions.h"
 #include <locale.h>
 #include <stdbool.h>
+#include "io_functions.h"
+#include "edit_text.h"
 
 #define BUF_SIZE 30
 
@@ -49,7 +50,7 @@ void printInfoFunctions(){
 }
 
 
-struct Sentence get_string(){
+struct Sentence getString(){
     struct Sentence sentence;
     wchar_t * text = (wchar_t *)malloc(BUF_SIZE * sizeof(wchar_t));
     int size = 0;
@@ -91,33 +92,6 @@ struct Sentence get_string(){
     return sentence;
 }
 
-wchar_t * toLowerSentence(struct Sentence sentence){
-    wchar_t * copied = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
-    wcscpy(copied, sentence.text);
-    for (int i = 0; i < wcslen(sentence.text); i++){
-        copied[i] = towlower(copied[i]);
-    }
-    return copied;
-}
-
-bool inText(struct Sentence * sentences, struct Sentence sentence, int sizeOfText){
-    if (sizeOfText < 1){
-        return false;
-    }
-    wchar_t * copied = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
-    copied = toLowerSentence(sentence);
-    for (int i = 0; i < sizeOfText; i++){
-        wchar_t * curr_sent = (wchar_t *)malloc(wcslen(sentences[i].text) * sizeof(wchar_t) + 1);
-        curr_sent = toLowerSentence(sentences[i]);
-        if (wcscmp(copied, curr_sent) == 0){
-            return true;
-            break;
-        }
-    }
-    free(copied);
-    return false;
-}
-
 struct Text get_text(){
     struct Text text;
     struct Sentence * sentences = malloc(BUF_SIZE * sizeof(struct Sentence));
@@ -126,7 +100,7 @@ struct Text get_text(){
     int size = 0;
     bool check = false;
     do {
-        curr_sent = get_string();
+        curr_sent = getString();
         check = inText(sentences, curr_sent, size);
         if (check){
             continue;
