@@ -1,5 +1,5 @@
 #include "edit_text.h"
-
+#define DEFAULT_DELIMETERS L" ,.-\n"
 wchar_t * toLowerSentence(Sentence sentence){
     wchar_t * lowerSentence = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
     wcscpy(lowerSentence, sentence.text);
@@ -39,12 +39,20 @@ bool isUnique(wchar_t ** currentUniqueWords, int countUniqueWords,wchar_t * word
     return true;
 }
 
-wchar_t ** getLowerSplittedText(Sentence sentence, int * size, wchar_t * delims){
+wchar_t ** getSplittedText(Sentence sentence, int * size, wchar_t * delims, bool lower){
     wchar_t ** result = (wchar_t **)malloc(sentence.size * sizeof(wchar_t *) + 1);
-    wchar_t * lowerSentence = toLowerSentence(sentence);
+    wchar_t * currSentence;
+    if (lower == true){
+        currSentence = toLowerSentence(sentence);
+    }
+    else {
+        wchar_t * copyString = (wchar_t *)malloc(sentence.size * sizeof(wchar_t *) + 1);
+        wcscpy(copyString, sentence.text);
+        currSentence = copyString;
+    }
     wchar_t * valueToken; // state of the current tokenization sequence.
     wchar_t * currentWord;
-    currentWord = wcstok(lowerSentence, delims, &valueToken);
+    currentWord = wcstok(currSentence, delims, &valueToken);
     while (currentWord != NULL){
         result[(*size)++] = currentWord;
         currentWord = wcstok(NULL, delims, &valueToken);
@@ -70,7 +78,7 @@ int getCountRepeatsInSentence(Sentence sentence){
     int countUniqueWords = 0;
     int countRepeats = 0;
     int sizeSplittedText = 0;
-    wchar_t ** splittedText = getLowerSplittedText(sentence, &sizeSplittedText, L" ,.-\n");
+    wchar_t ** splittedText = getSplittedText(sentence, &sizeSplittedText, DEFAULT_DELIMETERS, true);
     for (int i = 0; i < sizeSplittedText; i++){
         if (isUnique(uniqueWords, countUniqueWords, splittedText[i]) == true){
             int result = getCountInSplittedText(splittedText, sizeSplittedText, splittedText[i], i);
@@ -89,4 +97,27 @@ int getCountRepeatsInSentence(Sentence sentence){
 
 }
 
+bool containsLowerFirstLetters(Sentence sentence){
+    int sizeSplitted = 0;
+    wchar_t ** splittedSentence = getSplittedText(sentence, &sizeSplitted, DEFAULT_DELIMETERS, false);
+    for (int i = 0; i < sizeSplitted; i++){
+        // wprintf(L"[%ls]\n", splittedSentence[i][0]);
+        if (iswlower(splittedSentence[i][0])){
+            return true;
+            break;
+        }
+    }
+    return false;
+}
+
+Text function2(Text text){
+    int j = 0;
+    for (int i = 0; i < text.size; i++){
+        if (containsLowerFirstLetters(text.sentences[i]) == false){
+            text.sentences[j++] = text.sentences[i];
+        }
+    }
+    text.size = j;
+    return text;
+}
 

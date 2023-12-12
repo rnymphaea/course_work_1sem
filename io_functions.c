@@ -26,6 +26,9 @@ void controlInput(int numCase){
         case 0:
             printFinalText();
             break;
+        case 2:
+            printFunction2();
+            break;
         case 4:
             printCountRepeats();
             break;
@@ -54,6 +57,15 @@ void printFinalText(){
         free(text.sentences[i].text);
     }
     free(text.sentences);
+}
+
+void printFunction2(){
+    Text text = getText();
+    text = function2(text);
+    for (int i = 0; i < text.size; i++){
+        wprintf(L"%ls\n", text.sentences[i].text);
+        // free(text.sentences[i].text);
+    }
 }
 
 void printInfoFunctions(){
@@ -131,6 +143,7 @@ Text getText(){
     } while (curr_sent.isEnd != true);
     text.sentences = sentences;
     text.size = size;
+    
     return text;
 }
 
