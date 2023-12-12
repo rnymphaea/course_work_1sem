@@ -1,27 +1,28 @@
 #include "edit_text.h"
 
 wchar_t * toLowerSentence(Sentence sentence){
-    wchar_t * copied = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
-    wcscpy(copied, sentence.text);
+    wchar_t * lowerSentence = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
+    wcscpy(lowerSentence, sentence.text);
     for (int i = 0; i < wcslen(sentence.text); i++){
-        copied[i] = towlower(copied[i]);
+        lowerSentence[i] = towlower(lowerSentence[i]);
     }
-    return copied;
+    return lowerSentence;
 }
 
 bool inText(Sentence * sentences, Sentence sentence, int sizeOfText){
     if (sizeOfText < 1){
         return false;
     }
-    wchar_t * copied = toLowerSentence(sentence);
+    wchar_t * lowerSentence = toLowerSentence(sentence);
     for (int i = 0; i < sizeOfText; i++){
         wchar_t * curr_sent = toLowerSentence(sentences[i]);
-        if (wcscmp(copied, curr_sent) == 0){
+        if (wcscmp(lowerSentence, curr_sent) == 0){
+            free(lowerSentence);
             return true;
             break;
         }
     }
-    free(copied);
+    free(lowerSentence);
     return false;
 }
 
@@ -78,7 +79,11 @@ int getCountRepeatsInSentence(Sentence sentence){
             }
             uniqueWords[countUniqueWords++] = splittedText[i];
         }
+
     }
+
+    free(splittedText);
+    free(uniqueWords);
 
     return countRepeats;
 
