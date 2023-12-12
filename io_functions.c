@@ -24,12 +24,22 @@ void controlInput(int numCase){
         case 0:
             printFinalText();
             break;
+        case 4:
+            printCountRepeats();
+            break;
         case 5:
             printInfoFunctions();
             break;
         default:
             wprintf(L"Error: incorrect number of case.");
             break;
+    }
+}
+
+void printCountRepeats(){
+    Text text = get_text();
+    for (int i = 0; i < text.size; i++){
+        wprintf(L"Количество одинаковых слов: %d\n", getCountRepeatsInSentence(text.sentences[i]));
     }
 }
 
