@@ -1,6 +1,6 @@
 #include "edit_text.h"
 
-wchar_t * toLowerSentence(struct Sentence sentence){
+wchar_t * toLowerSentence(Sentence sentence){
     wchar_t * copied = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
     wcscpy(copied, sentence.text);
     for (int i = 0; i < wcslen(sentence.text); i++){
@@ -9,7 +9,7 @@ wchar_t * toLowerSentence(struct Sentence sentence){
     return copied;
 }
 
-bool inText(struct Sentence * sentences, struct Sentence sentence, int sizeOfText){
+bool inText(Sentence * sentences, Sentence sentence, int sizeOfText){
     if (sizeOfText < 1){
         return false;
     }
@@ -27,8 +27,12 @@ bool inText(struct Sentence * sentences, struct Sentence sentence, int sizeOfTex
     return false;
 }
 
-// int getCountRepeats(struct Sentence sentence){
 
-// }
+int getCountRepeats(Sentence sentence){
+    wchar_t * uniqueWords = (wchar_t *)malloc(sentence.size * sizeof(wchar_t *) + 1);
+    wchar_t * copied = toLowerSentence(sentence);
+
+
+}
 
 

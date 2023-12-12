@@ -34,7 +34,7 @@ void controlInput(int numCase){
 }
 
 void printFinalText(){
-    struct Text text = get_text();
+    Text text = get_text();
     for (int i = 0; i < text.size; i++){
         wprintf(L"%ls\n", text.sentences[i].text);
         free(text.sentences[i].text);
@@ -50,8 +50,8 @@ void printInfoFunctions(){
 }
 
 
-struct Sentence getString(){
-    struct Sentence sentence;
+Sentence getString(){
+    Sentence sentence;
     wchar_t * text = (wchar_t *)malloc(BUF_SIZE * sizeof(wchar_t));
     int size = 0;
     int curr_buf = BUF_SIZE;
@@ -92,10 +92,10 @@ struct Sentence getString(){
     return sentence;
 }
 
-struct Text get_text(){
-    struct Text text;
-    struct Sentence * sentences = malloc(BUF_SIZE * sizeof(struct Sentence));
-    struct Sentence curr_sent;
+Text get_text(){
+    Text text;
+    Sentence * sentences = malloc(BUF_SIZE * sizeof(Sentence));
+    Sentence curr_sent;
     int curr_buf = BUF_SIZE;
     int size = 0;
     bool check = false;
@@ -113,7 +113,7 @@ struct Text get_text(){
             size++;
             if (size == curr_buf - 1){
                 curr_buf += BUF_SIZE;
-                sentences = (struct Sentence *)realloc(sentences, curr_buf * sizeof(struct Sentence));
+                sentences = (Sentence *)realloc(sentences, curr_buf * sizeof(Sentence));
             }
         }
     } while (curr_sent.is_end != true);
