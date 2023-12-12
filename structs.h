@@ -5,7 +5,7 @@
 typedef struct {
     wchar_t * text;
     int size;
-    bool is_end;
+    bool isEnd;
 } Sentence ;
 
 typedef struct  {

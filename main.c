@@ -12,7 +12,7 @@
 int main()
 {
     setlocale(LC_ALL, "");
-    print_start_info_cw();
+    printStartInfoCw();
     int numCase = getNumCase();
     controlInput(numCase);
     return 0;
