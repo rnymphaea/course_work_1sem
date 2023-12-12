@@ -13,10 +13,8 @@ bool inText(Sentence * sentences, Sentence sentence, int sizeOfText){
     if (sizeOfText < 1){
         return false;
     }
-    // wchar_t * copied = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
     wchar_t * copied = toLowerSentence(sentence);
     for (int i = 0; i < sizeOfText; i++){
-    //    wchar_t * curr_sent = (wchar_t *)malloc(wcslen(sentences[i].text) * sizeof(wchar_t) + 1);
         wchar_t * curr_sent = toLowerSentence(sentences[i]);
         if (wcscmp(copied, curr_sent) == 0){
             return true;
@@ -40,16 +38,15 @@ bool isUnique(wchar_t ** currentUniqueWords, int countUniqueWords,wchar_t * word
     return true;
 }
 
-wchar_t ** getSplittedText(Sentence sentence, int * size){
+wchar_t ** getLowerSplittedText(Sentence sentence, int * size, wchar_t * delims){
     wchar_t ** result = (wchar_t **)malloc(sentence.size * sizeof(wchar_t *) + 1);
-    wchar_t * copied = toLowerSentence(sentence);
-    wchar_t * pt;
+    wchar_t * lowerSentence = toLowerSentence(sentence);
+    wchar_t * valueToken; // state of the current tokenization sequence.
     wchar_t * currentWord;
-    wchar_t * delims = L" ,.-\n";
-    currentWord = wcstok(copied, delims, &pt);
+    currentWord = wcstok(lowerSentence, delims, &valueToken);
     while (currentWord != NULL){
         result[(*size)++] = currentWord;
-        currentWord = wcstok(NULL, delims, &pt);
+        currentWord = wcstok(NULL, delims, &valueToken);
     }
     return result;
 }
@@ -72,8 +69,7 @@ int getCountRepeatsInSentence(Sentence sentence){
     int countUniqueWords = 0;
     int countRepeats = 0;
     int sizeSplittedText = 0;
-    wchar_t * copied = toLowerSentence(sentence);
-    wchar_t ** splittedText = getSplittedText(sentence, &sizeSplittedText);
+    wchar_t ** splittedText = getLowerSplittedText(sentence, &sizeSplittedText, L" ,.-\n");
     for (int i = 0; i < sizeSplittedText; i++){
         if (isUnique(uniqueWords, countUniqueWords, splittedText[i]) == true){
             int result = getCountInSplittedText(splittedText, sizeSplittedText, splittedText[i], i);
@@ -87,6 +83,5 @@ int getCountRepeatsInSentence(Sentence sentence){
     return countRepeats;
 
 }
-
 
 

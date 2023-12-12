@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <locale.h>
 #include <stdbool.h>
+
 #include "io_functions.h"
 #include "edit_text.h"
 
@@ -41,7 +42,9 @@ void printCountRepeats(){
     Text text = getText();
     for (int i = 0; i < text.size; i++){
         wprintf(L"Количество одинаковых слов: %d\n", getCountRepeatsInSentence(text.sentences[i]));
+        free(text.sentences[i].text);
     }
+    free(text.sentences);
 }
 
 void printFinalText(){
@@ -59,7 +62,6 @@ void printInfoFunctions(){
     "3) Сортировка слов в предложении по количеству гласных букв.",
     "4) Вывод количества одинаковых слов для каждого предложения.");
 }
-
 
 Sentence getString(){
     Sentence sentence;
@@ -131,4 +133,5 @@ Text getText(){
     text.size = size;
     return text;
 }
+
 
