@@ -6,6 +6,7 @@ void printInfoFunctions();
 int getNumCase();
 void controlInput(int numCase);
 void printFinalText();
+void printCountRepeats();
 Sentence getString();
 Text get_text();
 
