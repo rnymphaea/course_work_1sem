@@ -5,8 +5,8 @@
 #include <wctype.h>
 
 
-wchar_t * toLowerSentence(struct Sentence sentence);
-bool inText(struct Sentence * sentences, struct Sentence sentence, int sizeOfText);
+wchar_t * toLowerSentence(Sentence sentence);
+bool inText(Sentence * sentences, Sentence sentence, int sizeOfText);
 
 
 

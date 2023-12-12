@@ -2,13 +2,13 @@
 #include <wchar.h>
 #include <stdbool.h>
 
-struct Sentence {
+typedef struct {
     wchar_t * text;
     int size;
     bool is_end;
-};
+} Sentence ;
 
-struct Text {
-    struct Sentence * sentences;
+typedef struct  {
+    Sentence * sentences;
     int size;
-};
+} Text ;
