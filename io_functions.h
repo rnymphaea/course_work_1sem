@@ -6,6 +6,6 @@ void printInfoFunctions();
 int getNumCase();
 void controlInput(int numCase);
 void printFinalText();
-struct Sentence get_string();
+struct Sentence getString();
 struct Text get_text();
 

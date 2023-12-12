@@ -6,6 +6,7 @@
 
 #include "structs.h"
 #include "io_functions.h"
+#include "edit_text.h"
 
 
 int main()
