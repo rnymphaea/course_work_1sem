@@ -13,11 +13,11 @@ bool inText(struct Sentence * sentences, struct Sentence sentence, int sizeOfTex
     if (sizeOfText < 1){
         return false;
     }
-    wchar_t * copied = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
-    copied = toLowerSentence(sentence);
+    // wchar_t * copied = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
+    wchar_t * copied = toLowerSentence(sentence);
     for (int i = 0; i < sizeOfText; i++){
-        wchar_t * curr_sent = (wchar_t *)malloc(wcslen(sentences[i].text) * sizeof(wchar_t) + 1);
-        curr_sent = toLowerSentence(sentences[i]);
+    //    wchar_t * curr_sent = (wchar_t *)malloc(wcslen(sentences[i].text) * sizeof(wchar_t) + 1);
+        wchar_t * curr_sent = toLowerSentence(sentences[i]);
         if (wcscmp(copied, curr_sent) == 0){
             return true;
             break;
@@ -27,6 +27,8 @@ bool inText(struct Sentence * sentences, struct Sentence sentence, int sizeOfTex
     return false;
 }
 
+// int getCountRepeats(struct Sentence sentence){
 
+// }
 
 
