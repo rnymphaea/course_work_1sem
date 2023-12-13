@@ -5,11 +5,13 @@
 #include <wctype.h>
 
 
+
 wchar_t * toLowerSentence(Sentence sentence);
 bool inText(Sentence * sentences, Sentence sentence, int sizeOfText);
 bool isUnique(wchar_t ** currentUniqueWords, int countUniqueWords, wchar_t * word);
-wchar_t ** getLowerSplittedText(Sentence sentence, int * size, wchar_t * delims);
+wchar_t ** getSplittedText(Sentence sentence, int * size, wchar_t * delims, bool lower);
 int getCountInSplittedText(wchar_t ** splittedText, int size, wchar_t * word, int currIndex);
 int getCountRepeatsInSentence(Sentence sentence);
-
+bool containsLowerFirstLetters(Sentence sentence);
+Text deleteSentences(Text text);
 
