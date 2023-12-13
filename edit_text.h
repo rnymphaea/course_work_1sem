@@ -13,5 +13,5 @@ wchar_t ** getSplittedText(Sentence sentence, int * size, wchar_t * delims, bool
 int getCountInSplittedText(wchar_t ** splittedText, int size, wchar_t * word, int currIndex);
 int getCountRepeatsInSentence(Sentence sentence);
 bool containsLowerFirstLetters(Sentence sentence);
-Text function2(Text text);
+Text deleteSentences(Text text);
 

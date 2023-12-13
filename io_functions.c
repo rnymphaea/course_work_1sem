@@ -61,7 +61,7 @@ void printFinalText(){
 
 void printFunction2(){
     Text text = getText();
-    text = function2(text);
+    text = deleteSentences(text);
     for (int i = 0; i < text.size; i++){
         wprintf(L"%ls\n", text.sentences[i].text);
         // free(text.sentences[i].text);

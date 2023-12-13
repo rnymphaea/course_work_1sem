@@ -101,7 +101,6 @@ bool containsLowerFirstLetters(Sentence sentence){
     int sizeSplitted = 0;
     wchar_t ** splittedSentence = getSplittedText(sentence, &sizeSplitted, DEFAULT_DELIMETERS, false);
     for (int i = 0; i < sizeSplitted; i++){
-        // wprintf(L"[%ls]\n", splittedSentence[i][0]);
         if (iswlower(splittedSentence[i][0])){
             return true;
             break;
@@ -110,14 +109,18 @@ bool containsLowerFirstLetters(Sentence sentence){
     return false;
 }
 
-Text function2(Text text){
-    int j = 0;
+Text deleteSentences(Text text){
+    // предложения удаляются путём сдвига значений массива на одну позицию влево
+    int tmpIndex = 0; 
     for (int i = 0; i < text.size; i++){
-        if (containsLowerFirstLetters(text.sentences[i]) == false){
-            text.sentences[j++] = text.sentences[i];
+        if (containsLowerFirstLetters(text.sentences[i]) == false){ // если первая буква слова не в нижнем регистре, то помещаем элемент в новое место
+            text.sentences[tmpIndex++] = text.sentences[i];
+        }
+        else {
+            free(text.sentences[i].text);
         }
     }
-    text.size = j;
+    text.size = tmpIndex;
     return text;
 }
 
