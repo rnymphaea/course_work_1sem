@@ -1,5 +1,7 @@
 #include "edit_text.h"
 #define DEFAULT_DELIMETERS L" ,.-\n"
+#define ALL_LETTERS L"QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnmЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮйцукенгшщзхъфывапролджэячсмитьбю"
+
 wchar_t * toLowerSentence(Sentence sentence){
     wchar_t * lowerSentence = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
     wcscpy(lowerSentence, sentence.text);
@@ -123,4 +125,63 @@ Text deleteSentences(Text text){
     text.size = tmpIndex;
     return text;
 }
+
+int compareByVowels(const void * a, const void * b){
+    wchar_t * str1 = *((wchar_t **)a);
+    wchar_t * str2 = *((wchar_t **)b);
+    int countFirst = getCountVowels(str1);
+    int countSecond = getCountVowels(str2);
+    if (countFirst > countSecond){
+        return 1;
+    }
+    else if (countFirst < countSecond){
+        return -1;
+    }
+    return 0;
+}
+
+int getCountVowels(wchar_t * word){
+    int size = wcslen(word);
+    int countVowels = 0;
+    for (int i = 0; i < size; i++){
+        if (isVowel(word[i]) == true){
+            countVowels++;
+        }
+    }
+    
+    return countVowels;
+}
+
+bool isVowel(wchar_t symbol){
+    wchar_t new = towlower(symbol);
+    const wchar_t vowels[] = L"eyuioaуеыаоэяиью";
+    wchar_t * ptr = wcsrchr(vowels, new);
+    if (ptr != NULL){
+        return true;
+    }
+    return false;
+}
+
+wchar_t * makeSentence(wchar_t * destination, wchar_t ** splittedSentence, wchar_t ** delims, int sizeSplitted){
+    for (int i = 0; i < sizeSplitted; i++){
+        wcscat(destination, splittedSentence[i]);
+        wcscat(destination, delims[i]);
+    }
+    return destination;
+}
+
+Text getSortedText(Text text){
+    for (int i = 0; i < text.size; i++){
+        int sizeSplitted = 0;
+        int sizeDelims = 0;
+        wchar_t ** splittedSentence = getSplittedText(text.sentences[i], &sizeSplitted, DEFAULT_DELIMETERS, false);
+        wchar_t ** delims = getSplittedText(text.sentences[i], &sizeDelims, ALL_LETTERS, false);
+        wchar_t * resultSentence = (wchar_t *)malloc(text.sentences[i].size * sizeof(wchar_t *) + 1);
+        qsort(splittedSentence, sizeSplitted, sizeof(wchar_t *), compareByVowels);
+        resultSentence = makeSentence(resultSentence, splittedSentence, delims, sizeSplitted);
+        text.sentences[i].text = resultSentence;
+    }
+    return text;
+}
+
 

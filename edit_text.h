@@ -14,4 +14,9 @@ int getCountInSplittedText(wchar_t ** splittedText, int size, wchar_t * word, in
 int getCountRepeatsInSentence(Sentence sentence);
 bool containsLowerFirstLetters(Sentence sentence);
 Text deleteSentences(Text text);
+int compareByVowels(const void * a, const void * b);
+int getCountVowels(wchar_t * word);
+bool isVowel(wchar_t symbol);
+wchar_t * makeSentence(wchar_t * destination, wchar_t ** splittedSentence, wchar_t ** delims, int sizeSplitted);
+Text getSortedText(Text text);
 
