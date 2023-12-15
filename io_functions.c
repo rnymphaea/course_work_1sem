@@ -67,7 +67,8 @@ void printFunction2(){
     text = deleteSentences(text);
     for (int i = 0; i < text.size; i++){
         wprintf(L"%ls\n", text.sentences[i].text);
-        // free(text.sentences[i].text);
+        free(text.sentences[i].text);
+    // free(text.sentences);
     }
 }
 
@@ -76,6 +77,7 @@ void printFunction3(){
     text = getSortedText(text);
     for (int i = 0; i < text.size; i++){
         wprintf(L"%ls\n", text.sentences[i].text);
+        free(text.sentences[i].text);
     }
 }
 
@@ -116,7 +118,13 @@ Sentence getString(){
                 countNewLines = 0;
                 if (size == curr_buf - 1){
                     curr_buf += BUF_SIZE;
-                    text = (wchar_t *)realloc(text, curr_buf * sizeof(wchar_t));
+                    wchar_t * tmp = (wchar_t *)realloc(text, curr_buf * sizeof(wchar_t));
+                    if (tmp != NULL){
+                        text = tmp;
+                    }
+                    else {
+                        wprintf(L"Error: cannot allocate memory!");
+                    }
                 }
             }
         }
@@ -124,7 +132,6 @@ Sentence getString(){
     text[size] = END_OF_STRING;
     sentence.text = text;
     sentence.size = size;
-   
     return sentence;
 }
 
@@ -149,7 +156,13 @@ Text getText(){
             size++;
             if (size == curr_buf - 1){
                 curr_buf += BUF_SIZE;
-                sentences = (Sentence *)realloc(sentences, curr_buf * sizeof(Sentence));
+                Sentence * tmp = (Sentence *)realloc(sentences, curr_buf * sizeof(Sentence));
+                if (tmp != NULL){
+                    sentences = tmp;
+                }
+                else {
+                    wprintf(L"Error: cannot allocate memory!");
+                }
             }
         }
     } while (curr_sent.isEnd != true);

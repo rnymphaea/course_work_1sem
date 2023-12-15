@@ -3,12 +3,18 @@
 #define ALL_LETTERS L"QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnmЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮйцукенгшщзхъфывапролджэячсмитьбю"
 
 wchar_t * toLowerSentence(Sentence sentence){
-    wchar_t * lowerSentence = (wchar_t *)malloc(wcslen(sentence.text) * sizeof(wchar_t) + 1);
+    wchar_t * lowerSentence = (wchar_t *)malloc((wcslen(sentence.text) + 1) * sizeof(wchar_t));
+    if (lowerSentence == NULL){
+        wprintf(L"Error: cannot allocate memory!");
+        return NULL;
+    }
     wcscpy(lowerSentence, sentence.text);
-    for (int i = 0; i < wcslen(sentence.text); i++){
+    int length = wcslen(sentence.text);
+    for (int i = 0; i < length; i++){
         lowerSentence[i] = towlower(lowerSentence[i]);
     }
     return lowerSentence;
+
 }
 
 bool inText(Sentence * sentences, Sentence sentence, int sizeOfText){
@@ -20,9 +26,11 @@ bool inText(Sentence * sentences, Sentence sentence, int sizeOfText){
         wchar_t * curr_sent = toLowerSentence(sentences[i]);
         if (wcscmp(lowerSentence, curr_sent) == 0){
             free(lowerSentence);
+            free(curr_sent);
             return true;
             break;
         }
+        free(curr_sent);
     }
     free(lowerSentence);
     return false;
@@ -43,14 +51,12 @@ bool isUnique(wchar_t ** currentUniqueWords, int countUniqueWords,wchar_t * word
 
 wchar_t ** getSplittedText(Sentence sentence, int * size, wchar_t * delims, bool lower){
     wchar_t ** result = (wchar_t **)malloc(sentence.size * sizeof(wchar_t *) + 1);
-    wchar_t * currSentence;
+    wchar_t * currSentence  = (wchar_t *)malloc(sentence.size * sizeof(wchar_t *) + 1);
     if (lower == true){
         currSentence = toLowerSentence(sentence);
     }
     else {
-        wchar_t * copyString = (wchar_t *)malloc(sentence.size * sizeof(wchar_t *) + 1);
-        wcscpy(copyString, sentence.text);
-        currSentence = copyString;
+        wcscpy(currSentence, sentence.text);
     }
     wchar_t * valueToken; // state of the current tokenization sequence.
     wchar_t * currentWord;
@@ -59,6 +65,9 @@ wchar_t ** getSplittedText(Sentence sentence, int * size, wchar_t * delims, bool
         result[(*size)++] = currentWord;
         currentWord = wcstok(NULL, delims, &valueToken);
     }
+    // if (lower){
+    //     free(currSentence);
+    // }
     return result;
 }
 
@@ -104,10 +113,12 @@ bool containsLowerFirstLetters(Sentence sentence){
     wchar_t ** splittedSentence = getSplittedText(sentence, &sizeSplitted, DEFAULT_DELIMETERS, false);
     for (int i = 0; i < sizeSplitted; i++){
         if (iswlower(splittedSentence[i][0])){
+            free(splittedSentence);
             return true;
             break;
         }
     }
+    free(splittedSentence);
     return false;
 }
 
