@@ -29,6 +29,9 @@ void controlInput(int numCase){
         case 2:
             printFunction2();
             break;
+        case 3:
+            printFunction3();
+            break;
         case 4:
             printCountRepeats();
             break;
@@ -65,6 +68,14 @@ void printFunction2(){
     for (int i = 0; i < text.size; i++){
         wprintf(L"%ls\n", text.sentences[i].text);
         // free(text.sentences[i].text);
+    }
+}
+
+void printFunction3(){
+    Text text = getText();
+    text = getSortedText(text);
+    for (int i = 0; i < text.size; i++){
+        wprintf(L"%ls\n", text.sentences[i].text);
     }
 }
 
@@ -113,6 +124,7 @@ Sentence getString(){
     text[size] = END_OF_STRING;
     sentence.text = text;
     sentence.size = size;
+   
     return sentence;
 }
 
@@ -143,7 +155,6 @@ Text getText(){
     } while (curr_sent.isEnd != true);
     text.sentences = sentences;
     text.size = size;
-    
     return text;
 }
 

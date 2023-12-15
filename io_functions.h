@@ -9,6 +9,7 @@ void controlInput(int numCase);
 void printFinalText();
 void printCountRepeats();
 void printFunction2();
+void printFunction3();
 Sentence getString();
 Text getText();
 
