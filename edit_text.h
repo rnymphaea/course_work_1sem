@@ -19,4 +19,9 @@ int getCountVowels(wchar_t * word);
 bool isVowel(wchar_t symbol);
 wchar_t * makeSentence(wchar_t * destination, wchar_t ** splittedSentence, wchar_t ** delims, int sizeSplitted);
 Text getSortedText(Text text);
-
+int compareByLength(const void * a, const void * b);
+int compareByLetters(const void * a, const void * b);
+int getCountLetters(wchar_t * mask);
+bool inWords(wchar_t symbol, wchar_t ** splittedSentence, int sizeSplitted, int index);
+wchar_t * getTrueMask(wchar_t ** masks, int sizeTmp);
+wchar_t * getMask(Sentence sentence);

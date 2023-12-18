@@ -10,6 +10,7 @@ void printFinalText();
 void printCountRepeats();
 void printFunction2();
 void printFunction3();
+void printMask();
 Sentence getString();
 Text getText();
 

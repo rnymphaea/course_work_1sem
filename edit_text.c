@@ -50,15 +50,19 @@ bool isUnique(wchar_t ** currentUniqueWords, int countUniqueWords,wchar_t * word
 }
 
 wchar_t ** getSplittedText(Sentence sentence, int * size, wchar_t * delims, bool lower){
-    wchar_t ** result = (wchar_t **)malloc(sentence.size * sizeof(wchar_t *) + 1);
-    wchar_t * currSentence  = (wchar_t *)malloc(sentence.size * sizeof(wchar_t *) + 1);
+    wchar_t ** result = (wchar_t **)calloc(sentence.size + 1, sizeof(wchar_t *));
+    wchar_t * currSentence  = (wchar_t *)calloc(sentence.size + 1, sizeof(wchar_t *));
+    if (result == NULL || currSentence == NULL){
+        wprintf(L"Error: cannot allocate memory!");
+        exit(0);
+    }
     if (lower == true){
         currSentence = toLowerSentence(sentence);
     }
     else {
         wcscpy(currSentence, sentence.text);
     }
-    wchar_t * valueToken; // state of the current tokenization sequence.
+    wchar_t * valueToken; // state of the current tokenization sequence
     wchar_t * currentWord;
     currentWord = wcstok(currSentence, delims, &valueToken);
     while (currentWord != NULL){
@@ -195,4 +199,108 @@ Text getSortedText(Text text){
     return text;
 }
 
+int compareByLength(const void * a, const void * b){
+    wchar_t * str1 = *((wchar_t **)a);
+    wchar_t * str2 = *((wchar_t **)b);
+    int length1 = wcslen(str1);
+    int length2 = wcslen(str2);
+    if (length1 > length2){
+        return 1;
+    }
+    else if (length1 < length2){
+        return -1;
+    }
+    return 0;
+}
 
+int compareByLetters(const void * a, const void * b){
+    wchar_t * mask1 = *((wchar_t **)a);
+    wchar_t * mask2 = *((wchar_t **)b);
+    int count1 = getCountLetters(mask1);
+    int count2 = getCountLetters(mask2);
+    if (count1 < count2){
+        return 1;
+    }
+    else if (count1 > count2){
+        return -1;
+    }
+    return 0;
+}
+
+int getCountLetters(wchar_t * mask){
+    int len = wcslen(mask);
+    int count = 0;
+    for (int i = 0; i < len; i++){
+        if (mask[i] != L'?' && mask[i] != L'*'){
+            count++;
+        }
+    }
+    return count;
+}
+
+wchar_t * getTrueMask(wchar_t ** masks, int sizeTmp){
+    qsort(masks, sizeTmp, sizeof(wchar_t *), compareByLetters);
+    return masks[0];
+}
+
+bool inWords(wchar_t symbol, wchar_t ** splitted, int sizeSplitted, int index){
+    for (int i = index; i < sizeSplitted; i++){
+        wchar_t * ptr = wcschr(splitted[i], symbol);
+        if (ptr != NULL){
+            continue;
+        }
+        else {
+            return false;
+            break;
+        }
+        // wprintf(L"%p", ptr);
+    }
+    // putwchar(symbol);
+    
+    return true;
+}
+
+wchar_t * getMask(Sentence sentence){
+    int sizeSplitted = 0;
+    wchar_t ** splittedSentence = getSplittedText(sentence, &sizeSplitted, DEFAULT_DELIMETERS, false);
+    if (sizeSplitted == 1){
+        return splittedSentence[0];
+    }
+    wchar_t ** result = (wchar_t **)calloc(30, sizeof(wchar_t *));
+    
+    int size = 0;
+    wchar_t * resultMask = (wchar_t *)calloc(100, sizeof(wchar_t));
+    qsort(splittedSentence, sizeSplitted, sizeof(wchar_t *), compareByLength);
+    wcscpy(resultMask, splittedSentence[0]);
+    int sizeMask = wcslen(resultMask);
+    int size2 = wcslen(splittedSentence[1]);
+    // wchar_t * currentMask = (wchar_t *)calloc(wcslen(result[0]) + 3, sizeof(wchar_t)); // + 2*"*" + '\0'
+    wchar_t * mask;
+    int currSize;
+    
+    for (int i = 0; i < size2 - sizeMask + 1; i++){
+        mask = (wchar_t *)calloc(sizeMask + 100, sizeof(wchar_t));
+        currSize = 0;
+        if (i > 0){
+            mask[currSize++] = '*';
+        }
+        for (int j = 0; j < sizeMask; j++){
+            if (splittedSentence[0][j] == splittedSentence[1][j + i]){
+                mask[currSize++] = splittedSentence[0][j];
+            }
+            else {
+                mask[currSize++] = L'?';
+            }
+        }
+        if (i != size2 - sizeMask){
+            mask[currSize++] = L'*';
+        }
+        result[size++] = mask;
+        
+    }
+        
+    
+    wchar_t * res = getTrueMask(result, size);
+    wprintf(L"%ls\n", res);
+    return NULL;
+}

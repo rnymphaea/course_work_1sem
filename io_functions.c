@@ -26,6 +26,9 @@ void controlInput(int numCase){
         case 0:
             printFinalText();
             break;
+        case 1:
+            printMask();
+            break;
         case 2:
             printFunction2();
             break;
@@ -81,6 +84,13 @@ void printFunction3(){
     }
 }
 
+void printMask(){
+    Text text = getText();
+    for (int i = 0; i < text.size; i++){
+        getMask(text.sentences[i]);
+    }
+}
+
 void printInfoFunctions(){
     wprintf(L"%s\n%s\n%s\n%s\n", "1) Вывод строки-образца для каждого предложения.",
     "2) Удаление из текста предложений, в которых нет заглавных букв в начале слова.",
@@ -90,7 +100,11 @@ void printInfoFunctions(){
 
 Sentence getString(){
     Sentence sentence;
-    wchar_t * text = (wchar_t *)malloc(BUF_SIZE * sizeof(wchar_t));
+    wchar_t * text = (wchar_t *)calloc(BUF_SIZE, sizeof(wchar_t));
+    if (text == NULL){
+        wprintf(L"Error: cannot allocate memory");
+        exit(1);
+    }
     int size = 0;
     int curr_buf = BUF_SIZE;
     sentence.isEnd = false;
@@ -137,7 +151,11 @@ Sentence getString(){
 
 Text getText(){
     Text text;
-    Sentence * sentences = malloc(BUF_SIZE * sizeof(Sentence));
+    Sentence * sentences = (Sentence *)calloc(BUF_SIZE, sizeof(Sentence));
+    if (sentences == NULL){
+        wprintf(L"Error: cannot allocate memory!");
+        exit(1);
+    }
     Sentence curr_sent;
     int curr_buf = BUF_SIZE;
     int size = 0;
