@@ -298,9 +298,55 @@ wchar_t * getMask(Sentence sentence){
         result[size++] = mask;
         
     }
+    wchar_t * resTmp = getTrueMask(result, size);
+
+    if (sizeSplitted == 2){
+        return resTmp;
+    }
+    int tmp;
+    int lengthResTmp = wcslen(resTmp);
+    bool checkStart = (resTmp[0] == L'*');
+    bool checkEnd = (resTmp[lengthResTmp - 1] == L'*');
+    if (checkStart){
+        int tmpSize = 0;
+        for (int i = 1; i < lengthResTmp; i++){
+            resTmp[tmpSize++] = resTmp[i];
+        }
+        lengthResTmp = tmpSize;
+    }
+    if (checkEnd){
+        resTmp[--lengthResTmp] = L'\0';
         
-    
-    wchar_t * res = getTrueMask(result, size);
-    wprintf(L"%ls\n", res);
-    return NULL;
+    }
+    for (int i = 2; i < sizeSplitted; i++){
+        wchar_t ** masks = (wchar_t **)calloc(30, sizeof(wchar_t *));
+        int currSizeMasks = 0;
+        wchar_t * currWord = splittedSentence[i];
+        int currWordSize = wcslen(currWord);
+        for (int j = 0; j < currWordSize - lengthResTmp + 1; j++){ // смещение
+            wchar_t * tmpMask = (wchar_t *)calloc(lengthResTmp + 1, sizeof(wchar_t));
+            int tmpSize = 0;
+            for (int k = 0; k < lengthResTmp; k++){
+                if (resTmp[k] == currWord[k + j]){
+                    tmpMask[tmpSize++] = resTmp[k];
+                }
+                else {
+                    tmpMask[tmpSize++] = L'?';
+                }
+            }
+            if (j != currWordSize - lengthResTmp){
+                tmpMask[tmpSize++] = L'*';
+            }
+            masks[currSizeMasks++] = tmpMask;
+        }
+        resTmp = getTrueMask(masks, currSizeMasks);
+    }
+    if (checkStart){
+        wchar_t * star = L"*";
+        wchar_t * tmpStr = (wchar_t * )calloc(lengthResTmp + 2, sizeof(wchar_t));
+        wcscat(tmpStr, star);
+        wcscat(tmpStr, resTmp);
+        return tmpStr;
+    }
+    return resTmp;
 }

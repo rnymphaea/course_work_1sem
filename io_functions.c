@@ -87,7 +87,8 @@ void printFunction3(){
 void printMask(){
     Text text = getText();
     for (int i = 0; i < text.size; i++){
-        getMask(text.sentences[i]);
+        wchar_t * mask = getMask(text.sentences[i]);
+        wprintf(L"%ls\n", mask);
     }
 }
 
