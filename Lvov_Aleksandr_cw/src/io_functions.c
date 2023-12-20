@@ -4,11 +4,10 @@
 #include <locale.h>
 #include <stdbool.h>
 
-#include "io_functions.h"
-#include "edit_text.h"
+#include "headers/io_functions.h"
+#include "headers/edit_text.h"
+#include "headers/defines.h"
 
-#define BUF_SIZE 30
-#define END_OF_STRING L'\0'
 
 void printStartInfoCw(){
     wprintf(L"Course work for option 5.3, created by Aleksandr Lvov.\n");
@@ -80,7 +79,6 @@ void printFunction3(){
     text = getSortedText(text);
     for (int i = 0; i < text.size; i++){
         wprintf(L"%ls\n", text.sentences[i].text);
-        free(text.sentences[i].text);
     }
 }
 
@@ -99,12 +97,26 @@ void printInfoFunctions(){
     "4) Вывод количества одинаковых слов для каждого предложения.");
 }
 
+void printMemoryError(){
+    wprintf(L"Error: cannot allocate memory\n");
+}
+
+bool isBad(wchar_t symbol){
+    const wchar_t * BAD = L"!@#$%^&*№;:?*[{}()]<+->=\"'_~`/|\\";
+    for (int i = 0; i < wcslen(BAD); i++){
+        if (symbol == BAD[i]){
+            return true;
+            break;
+        }
+    }
+    return false;
+}
+
 Sentence getString(){
     Sentence sentence;
     wchar_t * text = (wchar_t *)calloc(BUF_SIZE, sizeof(wchar_t));
     if (text == NULL){
-        wprintf(L"Error: cannot allocate memory");
-        exit(1);
+        printMemoryError();
     }
     int size = 0;
     int curr_buf = BUF_SIZE;
@@ -117,7 +129,11 @@ Sentence getString(){
         if (chr == L'\n'){
             countNewLines++;
         }
+        if (isBad(chr)){
+            continue;
+        }
         if (countNewLines == 2){
+            text[size++] = END_OF_STRING;
             sentence.text = text;
             sentence.size = size;
             sentence.isEnd = true;
@@ -138,13 +154,13 @@ Sentence getString(){
                         text = tmp;
                     }
                     else {
-                        wprintf(L"Error: cannot allocate memory!");
+                        printMemoryError();
                     }
                 }
             }
         }
     } while (chr != L'.');
-    text[size] = END_OF_STRING;
+    text[size++] = END_OF_STRING;
     sentence.text = text;
     sentence.size = size;
     return sentence;
@@ -154,39 +170,37 @@ Text getText(){
     Text text;
     Sentence * sentences = (Sentence *)calloc(BUF_SIZE, sizeof(Sentence));
     if (sentences == NULL){
-        wprintf(L"Error: cannot allocate memory!");
-        exit(1);
+        printMemoryError();
     }
-    Sentence curr_sent;
-    int curr_buf = BUF_SIZE;
+    Sentence currSentence;
+    int currBuf = BUF_SIZE;
     int size = 0;
     bool check = false;
     do {
-        curr_sent = getString();
-        check = inText(sentences, curr_sent, size);
+        currSentence = getString();
+        check = inText(sentences, currSentence, size);
         if (check){
             continue;
         }
         else{
-            if (curr_sent.size == 0){
+            if (currSentence.size == 0){
                 continue;
             }
-            sentences[size] = curr_sent;
-            size++;
-            if (size == curr_buf - 1){
-                curr_buf += BUF_SIZE;
-                Sentence * tmp = (Sentence *)realloc(sentences, curr_buf * sizeof(Sentence));
+            sentences[size++] = currSentence;
+            if (size == currBuf - 1){
+                currBuf += BUF_SIZE;
+                Sentence * tmp = (Sentence *)realloc(sentences, currBuf * sizeof(Sentence));
                 if (tmp != NULL){
                     sentences = tmp;
                 }
                 else {
-                    wprintf(L"Error: cannot allocate memory!");
+                    printMemoryError();
                 }
             }
         }
-    } while (curr_sent.isEnd != true);
+    } while (currSentence.isEnd != true);
     text.sentences = sentences;
-    text.size = size;
+    text.size = size - 1;
     return text;
 }
 

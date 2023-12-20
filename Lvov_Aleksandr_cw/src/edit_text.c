@@ -1,11 +1,11 @@
-#include "edit_text.h"
-#define DEFAULT_DELIMETERS L" ,.-\n"
-#define ALL_LETTERS L"QWERTYUIOPASDFGHJKLZXCVBNMqwertyuiopasdfghjklzxcvbnmЙЦУКЕНГШЩЗХЪФЫВАПРОЛДЖЭЯЧСМИТЬБЮйцукенгшщзхъфывапролджэячсмитьбю"
+#include "headers/edit_text.h"
+#include "headers/io_functions.h"
+#include "headers/defines.h"
 
 wchar_t * toLowerSentence(Sentence sentence){
     wchar_t * lowerSentence = (wchar_t *)malloc((wcslen(sentence.text) + 1) * sizeof(wchar_t));
     if (lowerSentence == NULL){
-        wprintf(L"Error: cannot allocate memory!");
+        printMemoryError();
         return NULL;
     }
     wcscpy(lowerSentence, sentence.text);
@@ -53,8 +53,7 @@ wchar_t ** getSplittedText(Sentence sentence, int * size, wchar_t * delims, bool
     wchar_t ** result = (wchar_t **)calloc(sentence.size + 1, sizeof(wchar_t *));
     wchar_t * currSentence  = (wchar_t *)calloc(sentence.size + 1, sizeof(wchar_t *));
     if (result == NULL || currSentence == NULL){
-        wprintf(L"Error: cannot allocate memory!");
-        exit(0);
+        printMemoryError();
     }
     if (lower == true){
         currSentence = toLowerSentence(sentence);
@@ -69,9 +68,7 @@ wchar_t ** getSplittedText(Sentence sentence, int * size, wchar_t * delims, bool
         result[(*size)++] = currentWord;
         currentWord = wcstok(NULL, delims, &valueToken);
     }
-    // if (lower){
-    //     free(currSentence);
-    // }
+
     return result;
 }
 
@@ -156,7 +153,8 @@ int compareByVowels(const void * a, const void * b){
 }
 
 int getCountVowels(wchar_t * word){
-    int size = wcslen(word);
+    int size;
+    size = wcslen(word);
     int countVowels = 0;
     for (int i = 0; i < size; i++){
         if (isVowel(word[i]) == true){
@@ -169,7 +167,7 @@ int getCountVowels(wchar_t * word){
 
 bool isVowel(wchar_t symbol){
     wchar_t new = towlower(symbol);
-    const wchar_t vowels[] = L"eyuioaуеыаоэяиью";
+    const wchar_t vowels[] = LOWER_LETTERS;
     wchar_t * ptr = wcsrchr(vowels, new);
     if (ptr != NULL){
         return true;
@@ -182,6 +180,8 @@ wchar_t * makeSentence(wchar_t * destination, wchar_t ** splittedSentence, wchar
         wcscat(destination, splittedSentence[i]);
         wcscat(destination, delims[i]);
     }
+    int len = wcslen(destination);
+    destination[len] = END_OF_STRING;
     return destination;
 }
 
@@ -191,7 +191,10 @@ Text getSortedText(Text text){
         int sizeDelims = 0;
         wchar_t ** splittedSentence = getSplittedText(text.sentences[i], &sizeSplitted, DEFAULT_DELIMETERS, false);
         wchar_t ** delims = getSplittedText(text.sentences[i], &sizeDelims, ALL_LETTERS, false);
-        wchar_t * resultSentence = (wchar_t *)malloc(text.sentences[i].size * sizeof(wchar_t *) + 1);
+        wchar_t * resultSentence = (wchar_t *)calloc(text.sentences[i].size + BUF_SIZE, sizeof(wchar_t *));
+        if (sizeSplitted == 0 || sizeDelims == 0){
+            continue;
+        }
         qsort(splittedSentence, sizeSplitted, sizeof(wchar_t *), compareByVowels);
         resultSentence = makeSentence(resultSentence, splittedSentence, delims, sizeSplitted);
         text.sentences[i].text = resultSentence;
@@ -231,7 +234,7 @@ int getCountLetters(wchar_t * mask){
     int len = wcslen(mask);
     int count = 0;
     for (int i = 0; i < len; i++){
-        if (mask[i] != L'?' && mask[i] != L'*'){
+        if (mask[i] != INTERROBANG && mask[i] != ASTERISK){
             count++;
         }
     }
@@ -253,100 +256,134 @@ bool inWords(wchar_t symbol, wchar_t ** splitted, int sizeSplitted, int index){
             return false;
             break;
         }
-        // wprintf(L"%p", ptr);
     }
-    // putwchar(symbol);
-    
+    return true;
+}
+
+bool isAllMissed(wchar_t * mask){
+    int len = wcslen(mask);
+    for (int i = 0; i < len; i++){
+        if (iswalnum(mask[i])){
+            return false;
+            break;
+        }
+    }
     return true;
 }
 
 wchar_t * getMask(Sentence sentence){
     int sizeSplitted = 0;
     wchar_t ** splittedSentence = getSplittedText(sentence, &sizeSplitted, DEFAULT_DELIMETERS, false);
-    if (sizeSplitted == 1){
-        return splittedSentence[0];
+
+    if (sizeSplitted < 2){
+        return sentence.text;
     }
-    wchar_t ** result = (wchar_t **)calloc(30, sizeof(wchar_t *));
-    
+    int currBuf = BUF_SIZE;
+
+    wchar_t ** result = (wchar_t **)calloc(BUF_SIZE, sizeof(wchar_t *));
     int size = 0;
+
     wchar_t * resultMask = (wchar_t *)calloc(100, sizeof(wchar_t));
     qsort(splittedSentence, sizeSplitted, sizeof(wchar_t *), compareByLength);
     wcscpy(resultMask, splittedSentence[0]);
     int sizeMask = wcslen(resultMask);
     int size2 = wcslen(splittedSentence[1]);
-    // wchar_t * currentMask = (wchar_t *)calloc(wcslen(result[0]) + 3, sizeof(wchar_t)); // + 2*"*" + '\0'
+
     wchar_t * mask;
     int currSize;
     
     for (int i = 0; i < size2 - sizeMask + 1; i++){
-        mask = (wchar_t *)calloc(sizeMask + 100, sizeof(wchar_t));
+        mask = (wchar_t *)calloc(sizeMask + 3, sizeof(wchar_t));
         currSize = 0;
         if (i > 0){
-            mask[currSize++] = '*';
+            mask[currSize++] = ASTERISK;
         }
         for (int j = 0; j < sizeMask; j++){
             if (splittedSentence[0][j] == splittedSentence[1][j + i]){
                 mask[currSize++] = splittedSentence[0][j];
             }
             else {
-                mask[currSize++] = L'?';
+                mask[currSize++] = INTERROBANG;
             }
         }
         if (i != size2 - sizeMask){
-            mask[currSize++] = L'*';
+            mask[currSize++] = ASTERISK;
         }
         result[size++] = mask;
+        if (size == currBuf - 1){
+            currBuf += BUF_SIZE;
+            wchar_t ** tmpPtr = realloc(result, currBuf);
+            if (tmpPtr != NULL){
+                result = tmpPtr;
+            }
+            else {
+                printMemoryError();
+            }
+        }
         
     }
-    wchar_t * resTmp = getTrueMask(result, size);
+    
+    wchar_t * resTmp = getTrueMask(result, size); // стартовая маска
+    int lengthResTmp = wcslen(resTmp);
 
     if (sizeSplitted == 2){
-        return resTmp;
-    }
-    int tmp;
-    int lengthResTmp = wcslen(resTmp);
-    bool checkStart = (resTmp[0] == L'*');
-    bool checkEnd = (resTmp[lengthResTmp - 1] == L'*');
-    if (checkStart){
-        int tmpSize = 0;
-        for (int i = 1; i < lengthResTmp; i++){
-            resTmp[tmpSize++] = resTmp[i];
+        if (isAllMissed(resTmp)){
+            return STRING_ASTERISK;
         }
-        lengthResTmp = tmpSize;
+        else {
+            resTmp[lengthResTmp] = END_OF_STRING;
+            return resTmp;
+        }
     }
+    
+    bool checkEnd = (resTmp[lengthResTmp - 1] == ASTERISK);
+
     if (checkEnd){
-        resTmp[--lengthResTmp] = L'\0';
-        
+        resTmp[--lengthResTmp] = END_OF_STRING;
     }
+    wchar_t * tmpMask;
     for (int i = 2; i < sizeSplitted; i++){
         wchar_t ** masks = (wchar_t **)calloc(30, sizeof(wchar_t *));
         int currSizeMasks = 0;
         wchar_t * currWord = splittedSentence[i];
         int currWordSize = wcslen(currWord);
         for (int j = 0; j < currWordSize - lengthResTmp + 1; j++){ // смещение
-            wchar_t * tmpMask = (wchar_t *)calloc(lengthResTmp + 1, sizeof(wchar_t));
+            tmpMask = (wchar_t *)calloc(lengthResTmp + 2, sizeof(wchar_t));
             int tmpSize = 0;
             for (int k = 0; k < lengthResTmp; k++){
                 if (resTmp[k] == currWord[k + j]){
                     tmpMask[tmpSize++] = resTmp[k];
                 }
                 else {
-                    tmpMask[tmpSize++] = L'?';
+                    tmpMask[tmpSize++] = INTERROBANG;
                 }
             }
-            if (j != currWordSize - lengthResTmp){
-                tmpMask[tmpSize++] = L'*';
+            if (j != currWordSize - lengthResTmp + 1){
+                tmpMask[tmpSize++] = ASTERISK;
             }
             masks[currSizeMasks++] = tmpMask;
         }
+        
         resTmp = getTrueMask(masks, currSizeMasks);
     }
+    bool checkStart = (resTmp[0] == ASTERISK);
+ 
+    if (isAllMissed(resTmp)){
+        return STRING_ASTERISK;
+    }
     if (checkStart){
-        wchar_t * star = L"*";
+        wchar_t * strAsterisk = STRING_ASTERISK;
         wchar_t * tmpStr = (wchar_t * )calloc(lengthResTmp + 2, sizeof(wchar_t));
-        wcscat(tmpStr, star);
+
+        wcscat(tmpStr, strAsterisk);
         wcscat(tmpStr, resTmp);
+        int len = wcslen(tmpStr);
+        tmpStr[len] = END_OF_STRING;
         return tmpStr;
     }
+    if (resTmp[0] == INTERROBANG){
+        resTmp[0] = ASTERISK;
+    }
+    resTmp[lengthResTmp + 1] = END_OF_STRING;
     return resTmp;
 }
