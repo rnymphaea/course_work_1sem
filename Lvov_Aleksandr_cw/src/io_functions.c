@@ -29,10 +29,10 @@ void controlInput(int numCase){
             printMask();
             break;
         case 2:
-            printFunction2();
+            printTextWithoutDeleted();
             break;
         case 3:
-            printFunction3();
+            printSortedText();
             break;
         case 4:
             printCountRepeats();
@@ -40,10 +40,19 @@ void controlInput(int numCase){
         case 5:
             printInfoFunctions();
             break;
+        case 9:
+            printNeededWords();
+            break;
         default:
-            wprintf(L"Error: incorrect number of case.");
+            wprintf(L"Error: incorrect number of case.\n");
             break;
     }
+}
+
+void printNeededWords(){
+    Text text = getText();
+    wchar_t * startWord = getStartWord(text);
+    printTrueWords(text, startWord);
 }
 
 void printCountRepeats(){
@@ -64,17 +73,16 @@ void printFinalText(){
     free(text.sentences);
 }
 
-void printFunction2(){
+void printTextWithoutDeleted(){
     Text text = getText();
     text = deleteSentences(text);
     for (int i = 0; i < text.size; i++){
         wprintf(L"%ls\n", text.sentences[i].text);
         free(text.sentences[i].text);
-    // free(text.sentences);
     }
 }
 
-void printFunction3(){
+void printSortedText(){
     Text text = getText();
     text = getSortedText(text);
     for (int i = 0; i < text.size; i++){
@@ -91,10 +99,11 @@ void printMask(){
 }
 
 void printInfoFunctions(){
-    wprintf(L"%s\n%s\n%s\n%s\n", "1) Вывод строки-образца для каждого предложения.",
-    "2) Удаление из текста предложений, в которых нет заглавных букв в начале слова.",
-    "3) Сортировка слов в предложении по количеству гласных букв.",
-    "4) Вывод количества одинаковых слов для каждого предложения.");
+    wprintf(L"%ls\n%ls\n%ls\n%ls\n%ls\n", L"0) Первичная обработка текста.",
+    L"1) Вывод строки-образца для каждого предложения.",
+    L"2) Удаление из текста предложений, в которых нет заглавных букв в начале слова.",
+    L"3) Сортировка слов в предложении по количеству гласных букв.",
+    L"4) Вывод количества одинаковых слов для каждого предложения.");
 }
 
 void printMemoryError(){

@@ -139,10 +139,10 @@ Text deleteSentences(Text text){
 }
 
 int compareByVowels(const void * a, const void * b){
-    wchar_t * str1 = *((wchar_t **)a);
-    wchar_t * str2 = *((wchar_t **)b);
-    int countFirst = getCountVowels(str1);
-    int countSecond = getCountVowels(str2);
+    wchar_t * strOne = *((wchar_t **)a);
+    wchar_t * strTwo = *((wchar_t **)b);
+    int countFirst = getCountVowels(strOne);
+    int countSecond = getCountVowels(strTwo);
     if (countFirst > countSecond){
         return 1;
     }
@@ -203,28 +203,28 @@ Text getSortedText(Text text){
 }
 
 int compareByLength(const void * a, const void * b){
-    wchar_t * str1 = *((wchar_t **)a);
-    wchar_t * str2 = *((wchar_t **)b);
-    int length1 = wcslen(str1);
-    int length2 = wcslen(str2);
-    if (length1 > length2){
+    wchar_t * FirstStr = *((wchar_t **)a);
+    wchar_t * SecondStr = *((wchar_t **)b);
+    int lengthFirst = wcslen(FirstStr);
+    int lengthSecond = wcslen(SecondStr);
+    if (lengthFirst > lengthSecond){
         return 1;
     }
-    else if (length1 < length2){
+    else if (lengthFirst < lengthSecond){
         return -1;
     }
     return 0;
 }
 
 int compareByLetters(const void * a, const void * b){
-    wchar_t * mask1 = *((wchar_t **)a);
-    wchar_t * mask2 = *((wchar_t **)b);
-    int count1 = getCountLetters(mask1);
-    int count2 = getCountLetters(mask2);
-    if (count1 < count2){
+    wchar_t * FirstMask = *((wchar_t **)a);
+    wchar_t * SecondMask = *((wchar_t **)b);
+    int countFirst = getCountLetters(FirstMask);
+    int countSecond = getCountLetters(SecondMask);
+    if (countFirst < countSecond){
         return 1;
     }
-    else if (count1 > count2){
+    else if (countFirst > countSecond){
         return -1;
     }
     return 0;
@@ -246,20 +246,6 @@ wchar_t * getTrueMask(wchar_t ** masks, int sizeTmp){
     return masks[0];
 }
 
-bool inWords(wchar_t symbol, wchar_t ** splitted, int sizeSplitted, int index){
-    for (int i = index; i < sizeSplitted; i++){
-        wchar_t * ptr = wcschr(splitted[i], symbol);
-        if (ptr != NULL){
-            continue;
-        }
-        else {
-            return false;
-            break;
-        }
-    }
-    return true;
-}
-
 bool isAllMissed(wchar_t * mask){
     int len = wcslen(mask);
     for (int i = 0; i < len; i++){
@@ -271,22 +257,11 @@ bool isAllMissed(wchar_t * mask){
     return true;
 }
 
-wchar_t * getMask(Sentence sentence){
-    int sizeSplitted = 0;
-    wchar_t ** splittedSentence = getSplittedText(sentence, &sizeSplitted, DEFAULT_DELIMETERS, false);
-
-    if (sizeSplitted < 2){
-        return sentence.text;
-    }
+wchar_t * getStartMask(wchar_t ** splittedSentence){
     int currBuf = BUF_SIZE;
-
     wchar_t ** result = (wchar_t **)calloc(BUF_SIZE, sizeof(wchar_t *));
     int size = 0;
-
-    wchar_t * resultMask = (wchar_t *)calloc(100, sizeof(wchar_t));
-    qsort(splittedSentence, sizeSplitted, sizeof(wchar_t *), compareByLength);
-    wcscpy(resultMask, splittedSentence[0]);
-    int sizeMask = wcslen(resultMask);
+    int sizeMask = wcslen(splittedSentence[0]);
     int size2 = wcslen(splittedSentence[1]);
 
     wchar_t * mask;
@@ -320,10 +295,23 @@ wchar_t * getMask(Sentence sentence){
                 printMemoryError();
             }
         }
-        
     }
+    wchar_t * res = getTrueMask(result, size);
+    return res;
+}
+
+wchar_t * getMask(Sentence sentence){
+    int sizeSplitted = 0;
+    wchar_t ** splittedSentence = getSplittedText(sentence, &sizeSplitted, DEFAULT_DELIMETERS, false);
+
+    if (sizeSplitted < 2){
+        return sentence.text;
+    }
+
+    qsort(splittedSentence, sizeSplitted, sizeof(wchar_t *), compareByLength);
+
+    wchar_t * resTmp = getStartMask(splittedSentence); // стартовая маска
     
-    wchar_t * resTmp = getTrueMask(result, size); // стартовая маска
     int lengthResTmp = wcslen(resTmp);
 
     if (sizeSplitted == 2){
@@ -337,13 +325,14 @@ wchar_t * getMask(Sentence sentence){
     }
     
     bool checkEnd = (resTmp[lengthResTmp - 1] == ASTERISK);
-
     if (checkEnd){
         resTmp[--lengthResTmp] = END_OF_STRING;
     }
     wchar_t * tmpMask;
+    wchar_t ** masks;
     for (int i = 2; i < sizeSplitted; i++){
-        wchar_t ** masks = (wchar_t **)calloc(30, sizeof(wchar_t *));
+        masks = (wchar_t **)calloc(BUF_SIZE, sizeof(wchar_t *));
+        int currBufSize = BUF_SIZE;
         int currSizeMasks = 0;
         wchar_t * currWord = splittedSentence[i];
         int currWordSize = wcslen(currWord);
@@ -358,10 +347,20 @@ wchar_t * getMask(Sentence sentence){
                     tmpMask[tmpSize++] = INTERROBANG;
                 }
             }
-            if (j != currWordSize - lengthResTmp + 1){
+            if (j != currWordSize - lengthResTmp){
                 tmpMask[tmpSize++] = ASTERISK;
             }
             masks[currSizeMasks++] = tmpMask;
+            if (currSizeMasks == currBufSize - 1){
+                currBufSize += BUF_SIZE;
+                wchar_t ** tmpPtr = realloc(masks, currBufSize);
+                if (tmpPtr != NULL){
+                    masks = tmpPtr;
+                }
+                else {
+                    printMemoryError();
+                }
+            }
         }
         
         resTmp = getTrueMask(masks, currSizeMasks);
@@ -387,3 +386,75 @@ wchar_t * getMask(Sentence sentence){
     resTmp[lengthResTmp + 1] = END_OF_STRING;
     return resTmp;
 }
+
+wchar_t * getStartWord(Text text){
+    int size = 0;
+    wchar_t ** splittedFirstSentence = getSplittedText(text.sentences[0], &size, DEFAULT_DELIMETERS, true);
+    wchar_t * startWord = splittedFirstSentence[0];
+    return startWord;
+}
+
+wchar_t * toLowerWord(wchar_t * word){
+    int len = wcslen(word);
+    wchar_t * copy = (wchar_t *)calloc(len + 1, sizeof(wchar_t));
+    wcscpy(copy, word);
+    for (int i = 0; i < len; i++){
+        copy[i] = towlower(copy[i]);
+    }
+    copy[len] = END_OF_STRING;
+    return copy;
+}
+
+int getCountLettersWord(wchar_t * word, wchar_t letter){
+    letter = towlower(letter);
+    int len = wcslen(word);
+    wchar_t * copy = toLowerWord(word);
+    int count = 0;
+    
+    for (int i = 0; i < len; i++){
+        if (copy[i] == letter){
+            count++;
+        }
+    }
+    return count;
+}
+
+bool isTrue(wchar_t * startWord, wchar_t * word){
+    int lenStart = wcslen(startWord);
+    int lenEnd = wcslen(word);
+    int countEnd = 0;
+    int countStart = 0;
+    for (int i = 0; i < lenEnd; i++){
+        countEnd = getCountLettersWord(word, word[i]);
+        countStart = getCountLettersWord(startWord, word[i]);
+        if (countStart == 0){
+            return false;
+        }
+    }
+    return true;
+}
+
+void printTrueWords(Text text, wchar_t * startWord){
+    int check = 0;
+    for (int sentenceNum = 0; sentenceNum < text.size; sentenceNum++){
+        int currSentenceSize = 0;
+        wchar_t ** splittedSentence  = getSplittedText(text.sentences[sentenceNum], &currSentenceSize, DEFAULT_DELIMETERS, false);
+        if (sentenceNum == 0){
+            check = 1;
+        }
+        else {
+            check = 0;
+        }
+        for (int wordNum = check; wordNum < currSentenceSize; wordNum++){
+            if (isTrue(startWord, splittedSentence[wordNum])){
+                wprintf(L"%ls\n", splittedSentence[wordNum]);
+            }
+        }
+    }
+}
+
+
+
+
+
+
